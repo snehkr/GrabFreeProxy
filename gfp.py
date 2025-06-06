@@ -255,36 +255,38 @@ def main():
     for job in sources:
         result += job()
 
+    # remove duplicates (ip, port)
     complete_list = list(set(tuple(result)))
     filtered_list = filter(lambda x: verify_ip_port(*x), complete_list)
+    result = asyncio.run(runner(filtered_list))
 
-    try:
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(runner(filtered_list))
-    finally:
-        loop.close()
     return result
 
 
 if __name__ == "__main__":
     data = main()
+    sorted_data = []
 
     try:
         errorless_measures = [
             sum(
-                item[resource + "_error"] == "no"
+                item.get(resource + "_error") == "no"
                 for resource in map(itemgetter(0), CHECK_URLS)
             )
             for item in data
         ]
+
+        # Sort proxies by number of "no" errors
         arg_sorted = sorted(
             range(len(errorless_measures)),
             key=errorless_measures.__getitem__,
             reverse=True,
         )
+
         sorted_data = [data[ind] for ind in arg_sorted]
-    except KeyError:
-        pass
+
+    except (KeyError, TypeError, AttributeError) as e:
+        print(f"Error while sorting proxy data: {e}")
 
     to_json = {
         "status": "success",
@@ -292,9 +294,14 @@ if __name__ == "__main__":
         "description": "List of free proxies with status information",
         "author": "snehkr",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "proxies": sorted_data,
+        "proxies": sorted_data or data,
     }
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, "gfp_proxy.json"), "w") as f:
-        f.write(json.dumps(to_json, sort_keys=True, indent=4))
+    try:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(dir_path, "gfp_proxy.json")
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(to_json, f, sort_keys=True, indent=4)
+        print(f"Proxy list saved to {file_path}")
+    except Exception as e:
+        print(f"Error writing JSON file: {e}")
