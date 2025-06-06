@@ -25,9 +25,9 @@ A lightning-fast tool that collects, verifies, and delivers fresh proxy servers 
     {
       "ip": "xxx.xxx.xxx.xxx",
       "port": "xxxx",
-      "facebook_error": "no",
-      "facebook_status": 403,
-      "facebook_total_time": 10130,
+      "example_error": "no",
+      "example_status": 403,
+      "example_total_time": 10130,
       "google_error": "no",
       "google_status": 200,
       "google_total_time": 2760,
@@ -74,12 +74,12 @@ A lightning-fast tool that collects, verifies, and delivers fresh proxy servers 
 
 ## ⭐ Star this repo if you find it useful!
 
-- GitHub : [snehkr/GrabFreeProxy](https://github.com/snehkr/GrabFreeProxy/issues)
+- GitHub : [snehkr/GrabFreeProxy](https://github.com/snehkr/GrabFreeProxy)
 
 ## 🤝 Contributing
 
 - Found a bug? Want to improve the project?
-- 👉 Open an Issue or Submit a PR!
+- 👉 [Open an Issue](https://github.com/snehkr/GrabFreeProxy/issues) or Submit a PR!
 
 ## 📜 License
 
