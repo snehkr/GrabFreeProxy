@@ -1,0 +1,47 @@
+name: GrabFreeProxy Hourly Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *" # Runs at minute 0 of every hour (e.g., 1:00, 2:00, etc.)
+
+jobs:
+  update-proxies:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          pip install requests beautifulsoup4 aiohttp lxml
+
+      - name: Run GrabFreeProxy Script
+        run: |
+          chmod +x gfp.py
+          python3 gfp.py
+
+      - name: Update Gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+        run: |
+          pip install requests
+          python3 -c "
+          import requests, json
+          with open('gfp_proxy.json') as f:
+              content = json.load(f)
+          requests.patch(
+              'https://api.github.com/gists/$GIST_ID',
+              headers={'Authorization': f'token $GIST_TOKEN'},
+              json={'files': {'gfp_proxy.json': {'content': json.dumps(content, indent=2)}}}
+          )
+          "
